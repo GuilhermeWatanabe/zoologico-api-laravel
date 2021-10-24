@@ -6,6 +6,29 @@ use Illuminate\Http\Request;
 
 class AnimalController extends Controller
 {
+    public function __construct()
+    {
+        $this->validationrules = [
+            'nickname' => 'required|string',
+            'scientific_name' => 'required|string',
+            'password' => 'required|string',
+            'zoo_wing' => 'required|string',
+            'image' => 'required|image'
+        ];
+        $this->validationMessages = [
+            'required' => 'O campo :attribute é obrigatório.',
+            'string' => 'O campo :attribute não é um nome/texto válido.',
+            'image' => 'A imagem não é válida.'
+        ];
+        $this->validationAttributes = [
+            'nickname' => 'apelido',
+            'scientific_name' => 'nome científico',
+            'password' => 'senha',
+            'zoo_wing' => 'ala do zoológico',
+            'image' => 'imagem'
+        ];
+    }
+
     /**
      * Display a listing of the resource.
      *
