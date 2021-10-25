@@ -19,6 +19,6 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-Route::resource('animal', AnimalController::class)->only([
-    'index', 'store'
-]);
+Route::post('animal', [AnimalController::class, 'store']);
+//used POST to the update method because i can't upload files with PUT/PATH
+Route::post('animal/{id}', [AnimalController::class, 'update']);

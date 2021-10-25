@@ -11,6 +11,9 @@ class AnimalController extends Controller
 {
     public function __construct()
     {
+        $this->idRules = [
+            'id' => 'required|integer|exists:animals'
+        ];
         $this->validationrules = [
             'nickname' => 'required|string',
             'scientific_name' => 'required|string',
@@ -21,7 +24,9 @@ class AnimalController extends Controller
         $this->validationMessages = [
             'required' => 'O campo :attribute é obrigatório.',
             'string' => 'O campo :attribute não é um nome/texto válido.',
-            'image' => 'A imagem não é válida.'
+            'image' => 'A imagem não é válida.',
+            'integer' => 'O :attribute precisa ser um número inteiro.',
+            'exists' => 'Este cadastro não existe.'
         ];
         $this->validationAttributes = [
             'nickname' => 'apelido',
@@ -51,7 +56,12 @@ class AnimalController extends Controller
     public function store(Request $request)
     {
         //validation
-        $validator = Validator::make($request->all(), $this->validationrules, $this->validationMessages, $this->validationAttributes);
+        $validator = Validator::make(
+            $request->all(),
+            $this->validationrules,
+            $this->validationMessages,
+            $this->validationAttributes
+        );
 
         if ($validator->fails()) {
             return response()->json($validator->errors(), 400);
@@ -102,7 +112,37 @@ class AnimalController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        //validation
+        $validator = Validator::make(
+            array_merge(['id' => $id], $request->all()),
+            array_merge($this->idRules, $this->validationrules),
+            $this->validationMessages,
+            $this->validationAttributes
+        );
+
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 400);
+        }
+
+        //image upload to imgur
+        $response = Http::withHeaders([
+            'Authorization' => 'Client-ID 599b2d427ea9e85'
+        ])->post('https://api.imgur.com/3/image', [
+            'image' => base64_encode(file_get_contents($request->image->path()))
+        ]);
+
+        if ($response->failed()) {
+            return response()->json(['error' => 'Falha ao fazer upload do arquivo.'], 500);
+        }
+
+        $animal = Animal::find($id);
+        $animal->fill(array_merge(
+            $request->except('password, image'),
+            ['image_url' => $response->json('data')['link']])
+        );
+        $animal->save();
+
+        return response()->json($animal, 200);
     }
 
     /**
