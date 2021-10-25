@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Validator;
 
 class AnimalController extends Controller
 {
@@ -48,6 +49,12 @@ class AnimalController extends Controller
      */
     public function store(Request $request)
     {
+        $validator = Validator::make($request->all(), $this->validationrules, $this->validationMessages, $this->validationAttributes);
+
+        if($validator->fails()) {
+            return response()->json($validator->errors(), 400);
+        }
+
         $response = Http::withHeaders([
             'Authorization' => 'Client-ID 599b2d427ea9e85'
         ])->post('https://api.imgur.com/3/image', [
