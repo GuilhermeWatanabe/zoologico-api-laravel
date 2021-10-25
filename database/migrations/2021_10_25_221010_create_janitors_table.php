@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateAnimalsTable extends Migration
+class CreateJanitorsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,15 +13,11 @@ class CreateAnimalsTable extends Migration
      */
     public function up()
     {
-        Schema::create('animals', function (Blueprint $table) {
+        Schema::create('janitors', function (Blueprint $table) {
             $table->id();
-            $table->string('nickname');
-            $table->string('scientific_name');
-            $table->email('email');
+            $table->string('name');
+            $table->string('email');
             $table->string('password');
-            $table->string('zoo_wing');
-            $table->string('image_url');
-            $table->boolean('is_enabled')->default(true);
             $table->timestamps();
         });
     }
@@ -33,6 +29,6 @@ class CreateAnimalsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('animals');
+        Schema::dropIfExists('janitors');
     }
 }
