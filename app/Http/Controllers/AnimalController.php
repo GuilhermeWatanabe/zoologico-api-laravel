@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Animal;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Validator;
@@ -49,12 +50,14 @@ class AnimalController extends Controller
      */
     public function store(Request $request)
     {
+        //validation
         $validator = Validator::make($request->all(), $this->validationrules, $this->validationMessages, $this->validationAttributes);
 
-        if($validator->fails()) {
+        if ($validator->fails()) {
             return response()->json($validator->errors(), 400);
         }
 
+        //image upload to imgur
         $response = Http::withHeaders([
             'Authorization' => 'Client-ID 599b2d427ea9e85'
         ])->post('https://api.imgur.com/3/image', [
@@ -65,7 +68,18 @@ class AnimalController extends Controller
             return response()->json(['error' => 'Falha ao fazer upload do arquivo.'], 500);
         }
 
-        return $response->json('data')['link'];
+        return response()->json(
+            Animal::create(array_merge(
+                $request->only(
+                    'nickname',
+                    'scientific_name',
+                    'password',
+                    'zoo_wing'
+                ),
+                ['image_url' => $response->json('data')['link']]
+            )),
+            201
+        );
     }
 
     /**
