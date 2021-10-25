@@ -17,7 +17,7 @@ class CreateAnimalsTable extends Migration
             $table->id();
             $table->string('nickname');
             $table->string('scientific_name');
-            $table->email('email');
+            $table->string('email');
             $table->string('password');
             $table->string('zoo_wing');
             $table->string('image_url');
