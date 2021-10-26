@@ -48,7 +48,12 @@ class AnimalController extends Controller
      */
     public function index()
     {
-        //
+        return response()->json(Animal::all([
+            'nickname',
+            'likes',
+            'dislikes',
+            'is_enabled'
+        ]));
     }
 
     /**
@@ -161,5 +166,26 @@ class AnimalController extends Controller
     public function destroy($id)
     {
         //
+    }
+
+    public function disable($id)
+    {
+        //validation
+        $validator = Validator::make(
+            ['id' => $id],
+            $this->idRules,
+            $this->validationMessages,
+            $this->validationAttributes
+        );
+
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 400);
+        }
+
+        $animal = Animal::find($id);
+        $animal->is_enabled = false;
+        $animal->save();
+
+        return response()->json($animal, 200);
     }
 }
