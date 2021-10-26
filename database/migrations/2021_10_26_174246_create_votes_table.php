@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateLikesTable extends Migration
+class CreateVotesTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,9 +13,8 @@ class CreateLikesTable extends Migration
      */
     public function up()
     {
-        Schema::create('likes', function (Blueprint $table) {
+        Schema::create('votes', function (Blueprint $table) {
             $table->primary(['who_likes', 'animal_liked']);
-            $table->boolean('liked')->default(null);
 
             $table->foreignId('who_likes')->constrained('animals');
             $table->foreignId('animal_liked')->constrained('animals');
@@ -29,6 +28,6 @@ class CreateLikesTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('likes');
+        Schema::dropIfExists('votes');
     }
 }

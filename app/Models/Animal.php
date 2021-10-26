@@ -30,9 +30,9 @@ class Animal extends Authenticatable implements JWTSubject
         $this->attributes['password'] = Hash::make($password);
     }
 
-    public function likes()
+    public function votes()
     {
-        return $this->belongsToMany(Animal::class, 'animals', 'who_likes', 'animal_liked');
+        return $this->belongsToMany(Animal::class, 'votes', 'who_likes', 'animal_liked');
     }
 
     /**

@@ -26,12 +26,12 @@ Route::get('animal', [AnimalController::class, 'index']);
 Route::post('animal', [AnimalController::class, 'store']);
 //used POST to the update method because i can't upload files with PUT/PATH
 Route::post('animal/{id}', [AnimalController::class, 'update']);
-Route::patch('animal/voting/{id}', [AnimalController::class, 'voting']);
 Route::patch('animal/{id}', [AnimalController::class, 'disable']);
 
 Route::group(['middleware' => ['apiJWT']], function () {
     Route::post('logout', [AuthController::class, 'logout']);
 
+    Route::patch('animal/voting/{id}', [AnimalController::class, 'voting']);
 });
 
 //janitors routes

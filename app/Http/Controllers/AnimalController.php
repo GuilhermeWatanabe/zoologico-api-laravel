@@ -173,15 +173,16 @@ class AnimalController extends Controller
     /**
      * Mark the animal by given id with liked or disliked by the logged animal
      *
+     * @param  \Illuminate\Http\Request  $request
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function voting($id)
+    public function voting(Request $request, $id)
     {
         //validation
         $validator = Validator::make(
-            ['id' => $id],
-            $this->idRules,
+            array_merge(['id' => $id], $request->all()),
+            array_merge($this->idRules, ['dislike' => 'exclude_if:like,like']),
             $this->validationMessages,
             $this->validationAttributes
         );
@@ -190,9 +191,19 @@ class AnimalController extends Controller
             return response()->json($validator->errors(), 400);
         }
 
-        $animal = auth('api')->user();
+        $animalVoted = Animal::find($id);
+        if(is_null($request->like)) {
+            $animalVoted->dislikes++;
+        }
+        if(is_null($request->dislike)) {
+            $animalVoted->likes++;
+        }
+        $animalVoted->save();
 
-        return response()->json(auth('api')->user());
+        $animalVoting = auth('api-animals')->user();
+        $animalVoting->votes()->save($animalVoted);
+
+        return response()->json(['message' => 'Votado com sucesso.']);
     }
 
     /**
