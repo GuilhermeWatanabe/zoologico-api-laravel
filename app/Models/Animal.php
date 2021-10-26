@@ -18,6 +18,7 @@ class Animal extends Model
     protected $fillable = [
         'nickname',
         'scientific_name',
+        'email',
         'password',
         'zoo_wing',
         'image_url',

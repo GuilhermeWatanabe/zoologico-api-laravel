@@ -17,6 +17,7 @@ class AnimalController extends Controller
         $this->validationrules = [
             'nickname' => 'required|string',
             'scientific_name' => 'required|string',
+            'email' => 'required|email|unique:animals,email',
             'password' => 'required|string',
             'zoo_wing' => 'required|string',
             'image' => 'required|image'
@@ -26,14 +27,17 @@ class AnimalController extends Controller
             'string' => 'O campo :attribute não é um nome/texto válido.',
             'image' => 'A imagem não é válida.',
             'integer' => 'O :attribute precisa ser um número inteiro.',
-            'exists' => 'Este cadastro não existe.'
+            'exists' => 'Este cadastro não existe.',
+            'email' => 'E-mail inválido.',
+            'unique' => 'E-mail já está cadastrado.'
         ];
         $this->validationAttributes = [
             'nickname' => 'apelido',
             'scientific_name' => 'nome científico',
             'password' => 'senha',
             'zoo_wing' => 'ala do zoológico',
-            'image' => 'imagem'
+            'image' => 'imagem',
+            'email' => 'e-mail'
         ];
     }
 
@@ -78,18 +82,16 @@ class AnimalController extends Controller
             return response()->json(['error' => 'Falha ao fazer upload do arquivo.'], 500);
         }
 
-        return response()->json(
-            Animal::create(array_merge(
-                $request->only(
-                    'nickname',
-                    'scientific_name',
-                    'password',
-                    'zoo_wing'
-                ),
-                ['image_url' => $response->json('data')['link']]
-            )),
-            201
-        );
+        return Animal::create(array_merge(
+            $request->only(
+                'nickname',
+                'scientific_name',
+                'email',
+                'password',
+                'zoo_wing'
+            ),
+            ['image_url' => $response->json('data')['link']]
+        ));
     }
 
     /**
@@ -138,8 +140,8 @@ class AnimalController extends Controller
         $animal = Animal::find($id);
         $animal->fill(array_merge(
             $request->except('password, image'),
-            ['image_url' => $response->json('data')['link']])
-        );
+            ['image_url' => $response->json('data')['link']]
+        ));
         $animal->save();
 
         return response()->json($animal, 200);

@@ -17,11 +17,13 @@ class CreateAnimalsTable extends Migration
             $table->id();
             $table->string('nickname');
             $table->string('scientific_name');
-            $table->string('email');
+            $table->string('email')->unique();
             $table->string('password');
             $table->string('zoo_wing');
             $table->string('image_url');
             $table->boolean('is_enabled')->default(true);
+            $table->integer('likes')->nullable();
+            $table->integer('dislikes')->nullable();
             $table->timestamps();
         });
     }
