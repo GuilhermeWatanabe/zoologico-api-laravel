@@ -7,6 +7,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Auth;
+
 
 class AnimalController extends Controller
 {
@@ -168,6 +170,37 @@ class AnimalController extends Controller
         //
     }
 
+    /**
+     * Mark the animal by given id with liked or disliked by the logged animal
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function voting($id)
+    {
+        //validation
+        $validator = Validator::make(
+            ['id' => $id],
+            $this->idRules,
+            $this->validationMessages,
+            $this->validationAttributes
+        );
+
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 400);
+        }
+
+        $animal = auth('api')->user();
+
+        return response()->json(auth('api')->user());
+    }
+
+    /**
+     * Disables one animal by the given id.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
     public function disable($id)
     {
         //validation
