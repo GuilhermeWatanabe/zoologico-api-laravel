@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Animal;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Validator;
 
@@ -17,7 +18,6 @@ class AnimalController extends Controller
         $this->validationrules = [
             'nickname' => 'required|string',
             'scientific_name' => 'required|string',
-            'email' => 'required|email|unique:animals,email',
             'password' => 'required|string',
             'zoo_wing' => 'required|string',
             'image' => 'required|image'
@@ -62,7 +62,7 @@ class AnimalController extends Controller
         //validation
         $validator = Validator::make(
             $request->all(),
-            $this->validationrules,
+            array_merge($this->validationrules, ['email' => 'required|email|unique:animals,email']),
             $this->validationMessages,
             $this->validationAttributes
         );
@@ -126,6 +126,12 @@ class AnimalController extends Controller
             return response()->json($validator->errors(), 400);
         }
 
+        //gets the animal by the given id to check if the given password is correct
+        $animal = Animal::find($id);
+        if (!Hash::check($request->password, $animal->password)) {
+            return response()->json(['error' => 'Senha inválida.']);
+        }
+
         //image upload to imgur
         $response = Http::withHeaders([
             'Authorization' => 'Client-ID 599b2d427ea9e85'
@@ -137,7 +143,6 @@ class AnimalController extends Controller
             return response()->json(['error' => 'Falha ao fazer upload do arquivo.'], 500);
         }
 
-        $animal = Animal::find($id);
         $animal->fill(array_merge(
             $request->except('password, image'),
             ['image_url' => $response->json('data')['link']]
