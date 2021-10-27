@@ -18,10 +18,10 @@ class AuthController extends Controller
         $credentials = $request->only(['email', 'password']);
 
         if ($token = auth('api-janitors')->attempt($credentials)) {
-            return $this->respondWithToken($token, 'api-janitors');
+            return $this->respondWithToken($token, 'api-janitors', 'janitor');
         }
         if ($token = auth('api-animals')->attempt($credentials)) {
-            return $this->respondWithToken($token, 'api-animals');
+            return $this->respondWithToken($token, 'api-animals', 'animal');
         }
 
         return response()->json(['error' => 'Unauthorized'], 401);
@@ -57,12 +57,14 @@ class AuthController extends Controller
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    protected function respondWithToken($token, $guard)
+    protected function respondWithToken($token, $guard, $user)
     {
         return response()->json([
             'access_token' => $token,
             'token_type' => 'bearer',
-            'expires_in' => auth($guard)->factory()->getTTL() * 60
+            'expires_in' => auth($guard)->factory()->getTTL() * 60,
+            'user_type' => $user,
+            'id' => auth($guard)->user()->id
         ]);
     }
 }
