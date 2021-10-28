@@ -3,7 +3,6 @@
 use App\Http\Controllers\AnimalController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\JanitorController;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 
@@ -32,6 +31,7 @@ Route::group(['middleware' => ['apiJWT']], function () {
     Route::post('logout', [AuthController::class, 'logout']);
 
     Route::patch('animal/voting/{id}', [AnimalController::class, 'voting']);
+    Route::get('animal/to-vote', [AnimalController::class, 'toVote']);
 });
 
 //janitors routes

@@ -4,10 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\Animal;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Facades\Auth;
 
 
 class AnimalController extends Controller
@@ -51,6 +51,7 @@ class AnimalController extends Controller
     public function index()
     {
         return response()->json(Animal::all([
+            'id',
             'nickname',
             'likes',
             'dislikes',
@@ -231,5 +232,19 @@ class AnimalController extends Controller
         $animal->save();
 
         return response()->json($animal, 200);
+    }
+
+    /**
+     * Return animals to vote
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function toVote()
+    {
+      $user = auth('api-animals')->user();
+
+      $list = DB::table('animals')->where('id', '<>', $user->id)->where('id', '>', $user->interactions)->get(['id', 'nickname', 'scientific_name', 'zoo_wing', 'image_url']);
+
+      return response()->json($list, 200);
     }
 }

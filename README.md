@@ -46,6 +46,14 @@ Para rodar as migrations é só digitar o comando baixo no terminal:
 php artisan migrate
 ```
 
+### Gerando as chaves para o JWT
+```
+php artisan key:generate
+php artisan jwt:secret
+php artisan cache:clear
+php artisan config:clear
+```
+
 ### Rodando a aplicação
 Para subir a aplicação locamente, digite no terminal:
 ```
@@ -55,4 +63,3 @@ Ele vai subir a aplicação na porta 8000(padrão)
 
 ### Populando o banco de dados
 Para popular o banco de dados, use o Postman ou então os formulários da aplicação front-end.
-

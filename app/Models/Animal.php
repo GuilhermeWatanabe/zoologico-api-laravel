@@ -32,7 +32,7 @@ class Animal extends Authenticatable implements JWTSubject
 
     public function votes()
     {
-        return $this->belongsToMany(Animal::class, 'votes', 'who_likes', 'animal_liked');
+        return $this->belongsToMany(Animal::class, 'votes', 'who_likes', 'animal_liked')->latest();
     }
 
     /**

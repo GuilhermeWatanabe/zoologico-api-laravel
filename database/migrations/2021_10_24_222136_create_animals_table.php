@@ -24,6 +24,7 @@ class CreateAnimalsTable extends Migration
             $table->boolean('is_enabled')->default(true);
             $table->integer('likes')->nullable();
             $table->integer('dislikes')->nullable();
+            $table->integer('interactions')->default(0);
             $table->timestamps();
         });
     }
