@@ -202,7 +202,11 @@ class AnimalController extends Controller
         $animalVoted->save();
 
         $animalVoting = auth('api-animals')->user();
-        $animalVoting->votes()->save($animalVoted);
+        $animalVoting->interactions++;
+        if($animalVoting->interactions == $animalVoting->id) {
+            $animalVoting->interactions++;
+        }
+        $animalVoting->save();
 
         return response()->json(['message' => 'Votado com sucesso.']);
     }
@@ -243,7 +247,7 @@ class AnimalController extends Controller
     {
       $user = auth('api-animals')->user();
 
-      $list = DB::table('animals')->where('id', '<>', $user->id)->where('id', '>', $user->interactions)->get(['id', 'nickname', 'scientific_name', 'zoo_wing', 'image_url']);
+      $list = DB::table('animals')->where('id', '<>', $user->id)->where('id', '>=', $user->interactions)->get(['id', 'nickname', 'scientific_name', 'zoo_wing', 'image_url']);
 
       return response()->json($list, 200);
     }

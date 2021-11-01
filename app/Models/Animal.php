@@ -30,11 +30,6 @@ class Animal extends Authenticatable implements JWTSubject
         $this->attributes['password'] = Hash::make($password);
     }
 
-    public function votes()
-    {
-        return $this->belongsToMany(Animal::class, 'votes', 'who_likes', 'animal_liked')->latest();
-    }
-
     /**
      * Get the identifier that will be stored in the subject claim of the JWT.
      *
