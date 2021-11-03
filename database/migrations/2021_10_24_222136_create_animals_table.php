@@ -22,8 +22,8 @@ class CreateAnimalsTable extends Migration
             $table->string('zoo_wing');
             $table->string('image_url');
             $table->boolean('is_enabled')->default(true);
-            $table->integer('likes')->nullable();
-            $table->integer('dislikes')->nullable();
+            $table->integer('likes')->default(0)->nullable();
+            $table->integer('dislikes')->default(0)->nullable();
             $table->integer('interactions')->default(0);
             $table->timestamps();
         });
