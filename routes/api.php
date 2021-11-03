@@ -28,7 +28,7 @@ Route::group(['middleware' => ['apiJWT']], function () {
     
     //animals routes
     Route::get('animal', [AnimalController::class, 'index']);
-    //used POST to the update method because i can't upload files with PUT/PATH
+    //used POST to the update method because I can't upload files with PUT/PATH
     Route::post('animal/{id}', [AnimalController::class, 'update']);
     Route::patch('animal/{id}', [AnimalController::class, 'disable']);
     Route::patch('animal/voting/{id}', [AnimalController::class, 'voting']);
