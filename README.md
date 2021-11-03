@@ -1,5 +1,9 @@
 <h1 style="center">Zoológico bagunceiro API</h1>
 
+<p align="center">
+<img src="http://img.shields.io/static/v1?label=STATUS&message=EM%20DESENVOLVIMENTO&color=GREEN&style=for-the-badge"/>
+</p>
+
 ## Sobre o projeto
 
 Projeto desenvolvido como desafio para a empresa Codificar. Esta API complementa o projeto <a href="https://github.com/GuilhermeWatanabe/zoologico-bagunceiro-frontend">Zoológico bagunceiro front-end</a>.
