@@ -44,6 +44,12 @@ class JanitorService
         );
     }
 
+    /**
+     * Create an Janitor and associates it to the given user.
+     *
+     * @param User $user
+     * @return void
+     */
     public function registerJanitor(User $user)
     {
         $newJanitor = Janitor::create();
