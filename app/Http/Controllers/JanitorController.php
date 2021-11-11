@@ -2,9 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Janitor;
-use App\Models\User;
 use App\Services\JanitorService;
+use App\Services\UserService;
 use Illuminate\Http\Request;
 
 class JanitorController extends Controller
@@ -28,9 +27,8 @@ class JanitorController extends Controller
             return response()->json($validator->errors(), 400);
         }
 
-        $newUser = User::create($request->all());
-        $newJanitor = Janitor::create();
-        $newJanitor->user()->save($newUser);
+        $newUser = UserService::registerUser($request->all());
+        $this->service->registerJanitor($newUser);
 
         return response()->json($newUser, 201);
     }

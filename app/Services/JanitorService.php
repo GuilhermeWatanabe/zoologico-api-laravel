@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use App\Models\Janitor;
+use App\Models\User;
 use Illuminate\Support\Facades\Validator;
 
 class JanitorService
@@ -40,5 +42,11 @@ class JanitorService
             $this->validationMessages, 
             $this->validationAttributes
         );
+    }
+
+    public function registerJanitor(User $user)
+    {
+        $newJanitor = Janitor::create();
+        $newJanitor->user()->save($user);
     }
 }
