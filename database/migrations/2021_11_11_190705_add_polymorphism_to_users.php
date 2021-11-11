@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateJanitorsTable extends Migration
+class AddPolymorphismToUsers extends Migration
 {
     /**
      * Run the migrations.
@@ -13,8 +13,9 @@ class CreateJanitorsTable extends Migration
      */
     public function up()
     {
-        Schema::create('janitors', function (Blueprint $table) {
-            $table->id();
+        Schema::table('users', function (Blueprint $table) {
+            $table->string('profileable_type')->nullable();
+            $table->unsignedInteger('profileable_id')->nullable();
         });
     }
 
@@ -25,6 +26,8 @@ class CreateJanitorsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('janitors');
+        Schema::table('users', function (Blueprint $table) {
+            //
+        });
     }
 }

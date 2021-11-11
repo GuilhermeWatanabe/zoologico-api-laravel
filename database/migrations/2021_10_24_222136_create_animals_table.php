@@ -25,7 +25,6 @@ class CreateAnimalsTable extends Migration
             $table->integer('likes')->default(0)->nullable();
             $table->integer('dislikes')->default(0)->nullable();
             $table->integer('interactions')->default(0);
-            $table->timestamps();
         });
     }
 

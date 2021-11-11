@@ -32,6 +32,8 @@ class User extends Authenticatable
     protected $hidden = [
         'password',
         'remember_token',
+        'profileable_id',
+        'profileable_type'
     ];
 
     /**
@@ -43,9 +45,9 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
     ];
 
-    protected $with = ['profile'];
+    protected $with = ['profileable'];
 
-    public function profile()
+    public function profileable()
     {
         return $this->morphTo();
     }

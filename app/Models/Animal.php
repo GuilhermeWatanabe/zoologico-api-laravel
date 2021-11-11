@@ -22,4 +22,16 @@ class Animal extends Model
         'zoo_wing',
         'image_url',
     ];
+
+    /**
+     * Indicates if the model should be timestamped.
+     *
+     * @var bool
+     */
+    public $timestamps = false;
+
+    public function user()
+    {
+        return $this->morphOne(User::class, 'profileable');
+    }
 }

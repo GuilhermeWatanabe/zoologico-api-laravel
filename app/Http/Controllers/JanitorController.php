@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Janitor;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
@@ -12,7 +13,7 @@ class JanitorController extends Controller
     {
         $this->validationrules = [
             'name' => 'required|string',
-            'email' => 'required|email|unique:janitors,email',
+            'email' => 'required|email|unique:users,email',
             'password' => 'required|string',
         ];
         $this->validationMessages = [
@@ -29,16 +30,6 @@ class JanitorController extends Controller
     }
 
     /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function index()
-    {
-        //
-    }
-
-    /**
      * Store a newly created resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
@@ -52,40 +43,10 @@ class JanitorController extends Controller
             return response()->json($validator->errors(), 400);
         }
 
-        return response()->json(Janitor::create($request->all()), 201);
-    }
+        $newUser = User::create($request->all());
+        $newJanitor = Janitor::create();
+        $newJanitor->user()->save($newUser);
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function show($id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy($id)
-    {
-        //
+        return response()->json($newUser, 201);
     }
 }
