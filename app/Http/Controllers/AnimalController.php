@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Animal;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -18,9 +19,11 @@ class AnimalController extends Controller
             'id' => 'required|integer|exists:animals'
         ];
         $this->validationrules = [
+            'name' => 'required|string',
+            'email' => 'required|email|unique:users,email',
+            'password' => 'required|string',
             'nickname' => 'required|string',
             'scientific_name' => 'required|string',
-            'password' => 'required|string',
             'zoo_wing' => 'required|string',
             'image' => 'required|image'
         ];
@@ -70,7 +73,7 @@ class AnimalController extends Controller
         //validation
         $validator = Validator::make(
             $request->all(),
-            array_merge($this->validationrules, ['email' => 'required|email|unique:animals,email']),
+            $this->validationrules,
             $this->validationMessages,
             $this->validationAttributes
         );
@@ -87,8 +90,13 @@ class AnimalController extends Controller
         ]);
 
         if ($response->failed()) {
-            return response()->json(['error' => 'Falha ao fazer upload do arquivo.'], 500);
+            return response()->json(
+                ['error' => 'Falha ao fazer upload do arquivo.'],
+                500
+            );
         }
+
+        $newUser = User::create($request->only('name', 'email', 'password'));
 
         return Animal::create(array_merge(
             $request->only(
@@ -100,17 +108,6 @@ class AnimalController extends Controller
             ),
             ['image_url' => $response->json('data')['link']]
         ));
-    }
-
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function show($id)
-    {
-        //
     }
 
     /**
@@ -161,17 +158,6 @@ class AnimalController extends Controller
     }
 
     /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy($id)
-    {
-        //
-    }
-
-    /**
      * Mark the animal by given id with liked or disliked by the logged animal
      *
      * @param  \Illuminate\Http\Request  $request
@@ -193,17 +179,17 @@ class AnimalController extends Controller
         }
 
         $animalVoted = Animal::find($id);
-        if(is_null($request->like)) {
+        if (is_null($request->like)) {
             $animalVoted->dislikes++;
         }
-        if(is_null($request->dislike)) {
+        if (is_null($request->dislike)) {
             $animalVoted->likes++;
         }
         $animalVoted->save();
 
         $animalVoting = auth('api-animals')->user();
         $animalVoting->interactions++;
-        if($animalVoting->interactions == $animalVoting->id) {
+        if ($animalVoting->interactions == $animalVoting->id) {
             $animalVoting->interactions++;
         }
         $animalVoting->save();
@@ -245,10 +231,10 @@ class AnimalController extends Controller
      */
     public function toVote()
     {
-      $user = auth('api-animals')->user();
+        $user = auth('api-animals')->user();
 
-      $list = DB::table('animals')->where('id', '<>', $user->id)->where('id', '>=', $user->interactions)->get(['id', 'nickname', 'scientific_name', 'zoo_wing', 'image_url']);
+        $list = DB::table('animals')->where('id', '<>', $user->id)->where('id', '>=', $user->interactions)->get(['id', 'nickname', 'scientific_name', 'zoo_wing', 'image_url']);
 
-      return response()->json($list, 200);
+        return response()->json($list, 200);
     }
 }

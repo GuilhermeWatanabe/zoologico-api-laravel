@@ -4,29 +4,14 @@ namespace App\Http\Controllers;
 
 use App\Models\Janitor;
 use App\Models\User;
+use App\Services\JanitorService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
 
 class JanitorController extends Controller
 {
     public function __construct()
     {
-        $this->validationrules = [
-            'name' => 'required|string',
-            'email' => 'required|email|unique:users,email',
-            'password' => 'required|string',
-        ];
-        $this->validationMessages = [
-            'required' => 'O campo :attribute é obrigatório.',
-            'string' => 'O campo :attribute não é um nome/texto válido.',
-            'email' => 'Digite um e-mail válido.',
-            'unique' => 'Email já cadastrado.'
-        ];
-        $this->validationAttributes = [
-            'name' => 'nome',
-            'email' => 'e-mail',
-            'password' => 'senha',
-        ];
+        $this->service = new JanitorService();
     }
 
     /**
@@ -37,7 +22,7 @@ class JanitorController extends Controller
      */
     public function store(Request $request)
     {
-        $validator = Validator::make($request->all(), $this->validationrules, $this->validationMessages, $this->validationAttributes);
+        $validator = $this->service->validation($request->all());
 
         if ($validator->fails()) {
             return response()->json($validator->errors(), 400);
