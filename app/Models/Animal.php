@@ -15,14 +15,19 @@ class Animal extends Model
      * @var string[]
      */
     protected $fillable = [
-        'nickname',
         'scientific_name',
-        'email',
-        'password',
         'zoo_wing',
         'image_url',
     ];
 
+    /**
+     * The attributes that should be hidden for serialization.
+     *
+     * @var array
+     */
+    protected $hidden = [
+        'id'
+    ];
     /**
      * Indicates if the model should be timestamped.
      *

@@ -3,7 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Animal;
-use App\Models\User;
+use App\Services\AnimalService;
+use App\Services\UserService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -15,35 +16,7 @@ class AnimalController extends Controller
 {
     public function __construct()
     {
-        $this->idRules = [
-            'id' => 'required|integer|exists:animals'
-        ];
-        $this->validationrules = [
-            'name' => 'required|string',
-            'email' => 'required|email|unique:users,email',
-            'password' => 'required|string',
-            'nickname' => 'required|string',
-            'scientific_name' => 'required|string',
-            'zoo_wing' => 'required|string',
-            'image' => 'required|image'
-        ];
-        $this->validationMessages = [
-            'required' => 'O campo :attribute é obrigatório.',
-            'string' => 'O campo :attribute não é um nome/texto válido.',
-            'image' => 'A imagem não é válida.',
-            'integer' => 'O :attribute precisa ser um número inteiro.',
-            'exists' => 'Este cadastro não existe.',
-            'email' => 'E-mail inválido.',
-            'unique' => 'E-mail já está cadastrado.'
-        ];
-        $this->validationAttributes = [
-            'nickname' => 'apelido',
-            'scientific_name' => 'nome científico',
-            'password' => 'senha',
-            'zoo_wing' => 'ala do zoológico',
-            'image' => 'imagem',
-            'email' => 'e-mail'
-        ];
+        $this->service = new AnimalService();
     }
 
     /**
@@ -71,43 +44,42 @@ class AnimalController extends Controller
     public function store(Request $request)
     {
         //validation
-        $validator = Validator::make(
-            $request->all(),
-            $this->validationrules,
-            $this->validationMessages,
-            $this->validationAttributes
-        );
+        $validator = $this->service->validation($request->all());
 
         if ($validator->fails()) {
             return response()->json($validator->errors(), 400);
         }
 
         //image upload to imgur
-        $response = Http::withHeaders([
+        $imgurResponse = Http::withHeaders([
             'Authorization' => 'Client-ID 599b2d427ea9e85'
         ])->post('https://api.imgur.com/3/image', [
             'image' => base64_encode(file_get_contents($request->image->path()))
         ]);
 
-        if ($response->failed()) {
+        if ($imgurResponse->failed()) {
             return response()->json(
                 ['error' => 'Falha ao fazer upload do arquivo.'],
                 500
             );
         }
 
-        $newUser = User::create($request->only('name', 'email', 'password'));
+        $newUser = UserService::registerUser(
+            $request->only('name', 'email', 'password')
+        );
+        $newAnimal = $this->service->registerAnimal(
+            $newUser,
+            array_merge(
+                $request->only(
+                    'name',
+                    'scientific_name',
+                    'zoo_wing'
+                ),
+                ['image_url' => $imgurResponse->json('data')['link']]
+            )
+        );
 
-        return Animal::create(array_merge(
-            $request->only(
-                'nickname',
-                'scientific_name',
-                'email',
-                'password',
-                'zoo_wing'
-            ),
-            ['image_url' => $response->json('data')['link']]
-        ));
+        return response()->json(array_merge($newUser->toArray(), $newAnimal->toArray()), 201);
     }
 
     /**
