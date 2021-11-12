@@ -33,6 +33,6 @@ Route::patch('animal/{id}', [AnimalController::class, 'disable']);
 Route::patch('animal/voting/{id}', [AnimalController::class, 'voting']);
 Route::get('animal/to-vote', [AnimalController::class, 'toVote']);
 
-Route::group(['middleware' => ['apiJWT']], function () {
+Route::group(['middleware' => ['auth:sanctum']], function () {
 });
 

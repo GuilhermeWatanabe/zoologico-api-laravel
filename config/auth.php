@@ -40,14 +40,6 @@ return [
             'driver' => 'session',
             'provider' => 'users',
         ],
-        'api-janitors' => [
-            'driver' => 'jwt',
-            'provider' => 'janitors',
-        ],
-        'api-animals' => [
-            'driver' => 'jwt',
-            'provider' => 'animals',
-        ],
     ],
 
     /*
@@ -72,14 +64,6 @@ return [
             'driver' => 'eloquent',
             'model' => App\Models\User::class,
         ],
-        'janitors' => [
-            'driver' => 'eloquent',
-            'model' => App\Models\Janitor::class,
-        ],
-        'animals' => [
-            'driver' => 'eloquent',
-            'model' => App\Models\Animal::class,
-        ]
         // 'users' => [
         //     'driver' => 'database',
         //     'table' => 'users',
