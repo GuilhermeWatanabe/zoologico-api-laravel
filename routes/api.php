@@ -5,7 +5,6 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\JanitorController;
 use Illuminate\Support\Facades\Route;
 
-
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -23,7 +22,6 @@ Route::post('janitor', [JanitorController::class, 'store']);
 
 Route::post('animal', [AnimalController::class, 'store']);
 
-Route::post('logout', [AuthController::class, 'logout']);
 
 //animals routes
 Route::get('animal', [AnimalController::class, 'index']);
@@ -33,6 +31,12 @@ Route::patch('animal/{id}', [AnimalController::class, 'disable']);
 Route::patch('animal/voting/{id}', [AnimalController::class, 'voting']);
 Route::get('animal/to-vote', [AnimalController::class, 'toVote']);
 
-Route::group(['middleware' => ['auth:sanctum']], function () {
-});
 
+Route::group(['middleware' => ['auth:sanctum']], function () {
+    Route::get('me', function (Request $request) {
+        return response()->json(auth()->user());
+    });
+
+    Route::post('logout', [AuthController::class, 'logout']);
+
+});
