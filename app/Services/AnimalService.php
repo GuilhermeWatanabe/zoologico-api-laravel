@@ -49,13 +49,19 @@ class AnimalService
     public function validation(array $data)
     {
         return Validator::make(
-            $data, 
-            $this->validationrules, 
-            $this->validationMessages, 
+            $data,
+            $this->validationrules,
+            $this->validationMessages,
             $this->validationAttributes
         );
     }
 
+    /**
+     * Create an Animal and associates it to the given user.
+     *
+     * @param User $user
+     * @return Animal
+     */
     public function registerAnimal(User $user, array $data)
     {
         $newAnimal = Animal::create($data);

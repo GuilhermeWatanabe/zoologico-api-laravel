@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Animal;
 use App\Services\AnimalService;
+use App\Services\ImgurService;
 use App\Services\UserService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -51,11 +52,7 @@ class AnimalController extends Controller
         }
 
         //image upload to imgur
-        $imgurResponse = Http::withHeaders([
-            'Authorization' => 'Client-ID 599b2d427ea9e85'
-        ])->post('https://api.imgur.com/3/image', [
-            'image' => base64_encode(file_get_contents($request->image->path()))
-        ]);
+        $imgurResponse = ImgurService::uploadImage($request->image->path());
 
         if ($imgurResponse->failed()) {
             return response()->json(
@@ -79,7 +76,10 @@ class AnimalController extends Controller
             )
         );
 
-        return response()->json(array_merge($newUser->toArray(), $newAnimal->toArray()), 201);
+        return response()->json(
+            array_merge($newUser->toArray(), $newAnimal->toArray()),
+            201
+        );
     }
 
     /**
