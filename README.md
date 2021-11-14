@@ -12,19 +12,18 @@ Projeto desenvolvido como desafio para a empresa Codificar. Esta API complementa
 
 As seguintes ferramentas foram usadas na construção do projeto:
 
-- [PHP](https://www.php.net/)
-- [JWT](https://jwt.io/)
+- [Laravel](https://laravel.com)
 
 ## Configuração do projeto
 
 ### Clone este repositório
 ```
-git clone https://github.com/GuilhermeWatanabe/zoologico-bagunceiro-api.git
+git clone https://github.com/GuilhermeWatanabe/zoologico-api-laravel.git
 ```
 
 ### Navegue até a pasta do projeto
 ```
-cd zoologico-bagunceiro-api
+cd zoologico-api-laravel
 ```
 
 ### Instale todas as dependências
@@ -48,14 +47,6 @@ DB_PASSWORD=SENHA_DO_USUÁRIO
 Para rodar as migrations é só digitar o comando baixo no terminal:
 ```
 php artisan migrate
-```
-
-### Gerando as chaves para o JWT
-```
-php artisan key:generate
-php artisan jwt:secret
-php artisan cache:clear
-php artisan config:clear
 ```
 
 ### Rodando a aplicação
