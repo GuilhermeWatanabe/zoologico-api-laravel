@@ -29,7 +29,7 @@ class JanitorService
     }
 
     /**
-     * Validate the given data.
+     * Validates the given data.
      *
      * @param array $data
      * @return void
@@ -45,7 +45,7 @@ class JanitorService
     }
 
     /**
-     * Create an Janitor and associates it to the given user.
+     * Creates an Janitor and associates it to the given user.
      *
      * @param User $user
      * @return void

@@ -21,14 +21,6 @@ class Animal extends Model
     ];
 
     /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var array
-     */
-    protected $hidden = [
-        'id'
-    ];
-    /**
      * Indicates if the model should be timestamped.
      *
      * @var bool
@@ -38,5 +30,20 @@ class Animal extends Model
     public function user()
     {
         return $this->morphOne(User::class, 'profileable');
+    }
+
+    /**
+     * Change the is_enable value to a string.
+     *
+     * @param boolean $isEnabled
+     * @return string
+     */
+    public function getIsEnabledAttribute(bool $isEnabled)
+    {
+        if($isEnabled == true) {
+            return 'ATIVADO';
+        }
+
+        return 'DESATIVADO';
     }
 }

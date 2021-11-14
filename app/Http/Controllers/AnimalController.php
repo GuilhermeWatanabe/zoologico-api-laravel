@@ -9,7 +9,6 @@ use App\Services\UserService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Validator;
 
 
@@ -29,7 +28,6 @@ class AnimalController extends Controller
     {
         return response()->json(Animal::all([
             'id',
-            'nickname',
             'likes',
             'dislikes',
             'is_enabled'
@@ -77,7 +75,10 @@ class AnimalController extends Controller
         );
 
         return response()->json(
-            array_merge($newUser->toArray(), $newAnimal->toArray()),
+            array_merge(
+                $newUser->toArray(),
+                $newAnimal->makeHidden('id')->toArray()
+            ),
             201
         );
     }
@@ -86,51 +87,46 @@ class AnimalController extends Controller
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request)
     {
         //validation
-        $validator = Validator::make(
-            array_merge(['id' => $id], $request->all()),
-            array_merge($this->idRules, $this->validationrules),
-            $this->validationMessages,
-            $this->validationAttributes
-        );
+        $validator = $this->service->validation($request->except('_method'));
 
         if ($validator->fails()) {
             return response()->json($validator->errors(), 400);
         }
 
-        //gets the animal by the given id to check if the given password is correct
-        $animal = Animal::find($id);
+        //gets the logged animal
+        $animal = auth()->user();
         if (!Hash::check($request->password, $animal->password)) {
             return response()->json(['error' => 'Senha inválida.']);
         }
 
         //image upload to imgur
-        $response = Http::withHeaders([
-            'Authorization' => 'Client-ID 599b2d427ea9e85'
-        ])->post('https://api.imgur.com/3/image', [
-            'image' => base64_encode(file_get_contents($request->image->path()))
-        ]);
+        $imgurResponse = ImgurService::uploadImage($request->image->path());
 
-        if ($response->failed()) {
-            return response()->json(['error' => 'Falha ao fazer upload do arquivo.'], 500);
+        if ($imgurResponse->failed()) {
+            return response()->json(
+                ['error' => 'Falha ao fazer upload do arquivo.'],
+                500
+            );
         }
 
-        $animal->fill(array_merge(
-            $request->except('password, image'),
-            ['image_url' => $response->json('data')['link']]
-        ));
-        $animal->save();
+        $updatedAnimal = $this->service->updateAnimal(
+            $animal,
+            array_merge(
+                $request->except('password, image', '_method'),
+                ['image_url' => $imgurResponse->json('data')['link']]
+            )
+        );
 
-        return response()->json($animal, 200);
+        return response()->json($updatedAnimal, 200);
     }
 
     /**
-     * Mark the animal by given id with liked or disliked by the logged animal
+     * Mark the animal by the given id with liked or disliked by the logged animal
      *
      * @param  \Illuminate\Http\Request  $request
      * @param  int  $id
@@ -138,39 +134,22 @@ class AnimalController extends Controller
      */
     public function voting(Request $request, $id)
     {
-        //validation
-        $validator = Validator::make(
-            array_merge(['id' => $id], $request->all()),
-            array_merge($this->idRules, ['dislike' => 'exclude_if:like,like']),
-            $this->validationMessages,
-            $this->validationAttributes
-        );
-
-        if ($validator->fails()) {
-            return response()->json($validator->errors(), 400);
-        }
-
         $animalVoted = Animal::find($id);
-        if (is_null($request->like)) {
-            $animalVoted->dislikes++;
+        if (is_null($animalVoted)) {
+            return response()->json(['error' => 'Este animal não existe.']);
         }
-        if (is_null($request->dislike)) {
-            $animalVoted->likes++;
+        if (is_null($request->like) && is_null($request->dislike)) {
+            return response()->json(['error' => 'Voto inválido.']);
         }
-        $animalVoted->save();
 
-        $animalVoting = auth('api-animals')->user();
-        $animalVoting->interactions++;
-        if ($animalVoting->interactions == $animalVoting->id) {
-            $animalVoting->interactions++;
-        }
-        $animalVoting->save();
+        //send the like parammeter, if the user has voted dislike, will send null
+        $this->service->animalVote($animalVoted, $request->like);
 
         return response()->json(['message' => 'Votado com sucesso.']);
     }
 
     /**
-     * Disables one animal by the given id.
+     * Disables one animal by the id.
      *
      * @param  int  $id
      * @return \Illuminate\Http\Response
@@ -178,34 +157,32 @@ class AnimalController extends Controller
     public function disable($id)
     {
         //validation
-        $validator = Validator::make(
-            ['id' => $id],
-            $this->idRules,
-            $this->validationMessages,
-            $this->validationAttributes
-        );
+        $validator = $this->service->validateId(compact('id'));
 
         if ($validator->fails()) {
             return response()->json($validator->errors(), 400);
         }
 
-        $animal = Animal::find($id);
-        $animal->is_enabled = false;
-        $animal->save();
+        $this->service->disable($id);
 
-        return response()->json($animal, 200);
+        return response()->json(['message' => 'Desativado com sucesso.'], 200);
     }
 
     /**
-     * Return animals to vote
+     * Return the list of animals to vote
      *
      * @return \Illuminate\Http\Response
      */
     public function toVote()
     {
-        $user = auth('api-animals')->user();
+        $user = auth()->user();
+        $animal = $user->profileable;
 
-        $list = DB::table('animals')->where('id', '<>', $user->id)->where('id', '>=', $user->interactions)->get(['id', 'nickname', 'scientific_name', 'zoo_wing', 'image_url']);
+        $list = DB::table('animals')
+            ->where('animals.id', '<>', $animal->id)
+            ->where('animals.id', '>=', $animal->interactions)
+            ->join('users', 'animals.id', '=', 'users.profileable_id')
+            ->get(['animals.id', 'users.name', 'animals.scientific_name', 'animals.zoo_wing', 'animals.image_url']);
 
         return response()->json($list, 200);
     }

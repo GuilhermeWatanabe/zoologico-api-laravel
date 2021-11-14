@@ -6,6 +6,12 @@ use Illuminate\Support\Facades\Http;
 
 class ImgurService
 {
+    /**
+     * Upload the image to Imgur.
+     *
+     * @param string $image
+     * @return \Illuminate\Http\Client\PendingRequest
+     */
     public static function uploadImage($image)
     {
         return Http::withHeaders([

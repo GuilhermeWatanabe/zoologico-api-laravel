@@ -19,24 +19,14 @@ use Illuminate\Support\Facades\Route;
 Route::post('login', [AuthController::class, 'login']);
 
 Route::post('janitor', [JanitorController::class, 'store']);
-
 Route::post('animal', [AnimalController::class, 'store']);
 
-
-//animals routes
-Route::get('animal', [AnimalController::class, 'index']);
-//used POST to the update method because I can't upload files with PUT/PATH
-Route::post('animal/{id}', [AnimalController::class, 'update']);
-Route::patch('animal/{id}', [AnimalController::class, 'disable']);
-Route::patch('animal/voting/{id}', [AnimalController::class, 'voting']);
-Route::get('animal/to-vote', [AnimalController::class, 'toVote']);
-
-
 Route::group(['middleware' => ['auth:sanctum']], function () {
-    Route::get('me', function (Request $request) {
-        return response()->json(auth()->user());
-    });
+    Route::get('animal', [AnimalController::class, 'index']);
+    Route::patch('animal', [AnimalController::class, 'update']);
+    Route::patch('animal/voting/{id}', [AnimalController::class, 'voting']);
+    Route::patch('animal/{id}', [AnimalController::class, 'disable']);
+    Route::get('animal/to-vote', [AnimalController::class, 'toVote']);
 
     Route::post('logout', [AuthController::class, 'logout']);
-
 });

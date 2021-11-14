@@ -33,7 +33,8 @@ class User extends Authenticatable
         'password',
         'remember_token',
         'profileable_id',
-        'profileable_type'
+        'profileable_type',
+        'email_verified_at'
     ];
 
     /**
