@@ -45,7 +45,7 @@ class JanitorService
     }
 
     /**
-     * Creates an Janitor and associates it to the given user.
+     * Creates a Janitor and associates it to the given user.
      *
      * @param User $user
      * @return void
