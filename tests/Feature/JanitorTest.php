@@ -2,7 +2,7 @@
 
 namespace Tests\Feature;
 
-use App\Models\Janitor;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
@@ -31,7 +31,7 @@ class JanitorTest extends TestCase
      */
     public function test_if_fails_with_invalid_email()
     {
-        $janitor = Janitor::factory()->make();
+        $janitor = User::factory()->make();
         $janitor->email  = 'invalid';
 
         $response = $this->register($janitor->toArray());
@@ -47,10 +47,12 @@ class JanitorTest extends TestCase
      */
     public function test_if_fails_when_try_to_register_duplicated_email()
     {
-        $janitor = Janitor::factory()->make();
+        $janitor = User::factory()->make();
 
-        $this->register($janitor->toArray());
-        $response = $this->register($janitor->toArray());
+
+        $this->register($janitor->makeVisible('password')->toArray());
+        $response = $this->register($janitor->makeVisible('password')->toArray());
+
 
         $response->assertStatus(400);
         $response->assertJsonPath('email.0', 'Email já cadastrado.');
@@ -58,9 +60,9 @@ class JanitorTest extends TestCase
 
     public function test_if_succeed_sending_the_correct_data()
     {
-        $janitor = Janitor::factory()->make();
+        $janitor = User::factory()->make();
 
-        $response = $this->register($janitor->toArray());
+        $response = $this->register($janitor->makeVisible('password')->toArray());
 
         $response->assertCreated();
         $this->assertDatabaseCount('users', 1);
