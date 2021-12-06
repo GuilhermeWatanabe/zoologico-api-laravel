@@ -21,7 +21,14 @@ class JanitorTest extends TestCase
         $response = $this->register();
 
         $response->assertStatus(400);
-        $response->assertJsonValidationErrors(['name', 'email', 'password'], null);
+        $response->assertJsonValidationErrors(
+            [
+                'name' => 'O campo nome é obrigatório.',
+                'email' => 'O campo e-mail é obrigatório.',
+                'password' => 'O campo senha é obrigatório.'
+            ],
+            null
+        );
     }
 
     /**
@@ -58,6 +65,11 @@ class JanitorTest extends TestCase
         $response->assertJsonPath('email.0', 'Email já cadastrado.');
     }
 
+    /**
+     * Test if register a new Janitor when sending the right data.
+     *
+     * @return void
+     */
     public function test_if_succeed_sending_the_correct_data()
     {
         $janitor = User::factory()->make();

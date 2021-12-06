@@ -7,9 +7,9 @@ use App\Services\AnimalService;
 use App\Services\ImgurService;
 use App\Services\UserService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Validator;
 
 
 class AnimalController extends Controller
@@ -99,7 +99,8 @@ class AnimalController extends Controller
         }
 
         //gets the logged animal
-        $animal = auth()->user();
+        $animal = $request->user();
+
         if (!Hash::check($request->password, $animal->password)) {
             return response()->json(['error' => 'Senha inválida.']);
         }
@@ -136,16 +137,16 @@ class AnimalController extends Controller
     {
         $animalVoted = Animal::find($id);
         if (is_null($animalVoted)) {
-            return response()->json(['error' => 'Este animal não existe.']);
+            return response()->json(['error' => 'Este animal não existe.'], 400);
         }
         if (is_null($request->like) && is_null($request->dislike)) {
-            return response()->json(['error' => 'Voto inválido.']);
+            return response()->json(['error' => 'Voto inválido.'], 400);
         }
 
         //send the like parammeter, if the user has voted dislike, will send null
         $this->service->animalVote($animalVoted, $request->like);
 
-        return response()->json(['message' => 'Votado com sucesso.']);
+        return response()->json(['message' => 'Voto salvo.']);
     }
 
     /**
@@ -175,7 +176,7 @@ class AnimalController extends Controller
      */
     public function toVote()
     {
-        $user = auth()->user();
+        $user = Auth::user();
         $animal = $user->profileable;
 
         $list = DB::table('animals')
