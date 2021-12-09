@@ -10,8 +10,6 @@ use Tests\TestCase;
 
 class AnimalTest extends TestCase
 {
-    use RefreshDatabase;
-
     /**
      * Test if fails with no request data.
      *
@@ -33,6 +31,35 @@ class AnimalTest extends TestCase
     }
 
     /**
+     * Test if register a new Animal when sending the right data.
+     *
+     * @return Animal
+     */
+    public function test_if_register_an_animal_sending_the_correct_data()
+    {
+        $animal = Animal::factory()->make();
+        $response = $this->registerRoute($animal->toArray());
+
+        $response->assertCreated();
+        $response->assertJsonPath('name', $animal->name);
+        $response->assertJsonPath('email', $animal->email);
+        $response->assertJsonPath('scientific_name', $animal->scientific_name);
+        $response->assertJsonPath('zoo_wing', $animal->zoo_wing);
+        $this->assertDatabaseCount('users', 1);
+        $this->assertDatabaseCount('animals', 1);
+        $this->assertDatabaseHas('users', [
+            'name' => $animal->name,
+            'email' => $animal->email
+        ]);
+        $this->assertDatabaseHas('animals', [
+            'scientific_name' => $animal->scientific_name,
+            'zoo_wing' => $animal->zoo_wing,
+        ]);
+
+        return $animal;
+    }
+
+    /**
      * Test if fails with invalid email.
      *
      * @return void
@@ -49,16 +76,15 @@ class AnimalTest extends TestCase
         $response->assertJsonCount(1);
     }
 
-    /*
     /**
      * Test if fails when try to register duplicated email.
      *
+     * @depends test_if_register_an_animal_sending_the_correct_data
+     * @param Animal $animal
      * @return void
      */
-    public function test_if_fails_when_try_to_register_duplicated_email()
+    public function test_if_fails_when_try_to_register_duplicated_email(Animal $animal)
     {
-        $animal = $this->registerAnAnimal();
-
         $response = $this->registerRoute($animal->toArray());
 
         $response->assertStatus(400);
@@ -83,47 +109,19 @@ class AnimalTest extends TestCase
     }
 
     /**
-     * Test if register a new Animal when sending the right data.
-     *
-     * @return void
-     */
-    public function test_if_register_an_animal_sending_the_correct_data()
-    {
-        $animal = Animal::factory()->make();
-        $response = $this->registerRoute($animal->toArray());
-
-        $response->assertCreated();
-        $response->assertJsonPath('name', $animal->name);
-        $response->assertJsonPath('email', $animal->email);
-        $response->assertJsonPath('scientific_name', $animal->scientific_name);
-        $response->assertJsonPath('zoo_wing', $animal->zoo_wing);
-        $this->assertDatabaseCount('users', 1);
-        $this->assertDatabaseCount('animals', 1);
-        $this->assertDatabaseHas('users', [
-            'name' => $animal->name,
-            'email' => $animal->email
-        ]);
-        $this->assertDatabaseHas('animals', [
-            'scientific_name' => $animal->scientific_name,
-            'zoo_wing' => $animal->zoo_wing,
-        ]);
-    }
-
-    /**
      * Test if updates a registered user.
      *
+     * @depends test_if_register_an_animal_sending_the_correct_data
      * @param Animal $animal
      * @return void
      */
-    public function test_if_updates_a_registered_user()
+    public function test_if_updates_a_registered_user(Animal $animal)
     {
-        $animal = $this->registerAnAnimal();
-
         $anotherAnimal = Animal::factory()->make();
         $anotherAnimal->password = $animal->password;
 
         //get all the information about the user from the USER model.
-        $user = $this->getFromUserModel($animal);
+        $user = $this->getFromUserModel($animal->email);
 
         $response = $this->actingAs($user)->post('/api/animal', array_merge(
             $anotherAnimal->toArray(),
@@ -146,7 +144,6 @@ class AnimalTest extends TestCase
             'zoo_wing' => $anotherAnimal->zoo_wing,
         ]);
     }
-
 
     /**
      * Helper function to make request and register a Janitor.
@@ -174,15 +171,15 @@ class AnimalTest extends TestCase
     }
 
     /**
-     * Helper to get the informations FROM THE USER MODEL instead of the ANIMAL
+     * Helper to get the informations by email FROM THE USER MODEL instead of the ANIMAL
      * (some things don't work if I use the animal's model. EX:Auth::user(), 
      * because the authentication is made with USER model not with the ANIMAL model).
      *
-     * @param Animal $animal
+     * @param string $email
      * @return User
      */
-    public function getFromUserModel(Animal $animal)
+    public function getFromUserModel(string $email)
     {
-        return User::where('email', $animal->email)->first();
+        return User::where('email', $email)->first();
     }
 }
